@@ -40,6 +40,7 @@ type SetDNSChaosRequest struct {
 	Scope                string   `protobuf:"bytes,4,opt,name=scope,proto3" json:"scope,omitempty"`
 	Selector             string   `protobuf:"bytes,5,opt,name=selector,proto3" json:"selector,omitempty"`
 	Patterns             []string `protobuf:"bytes,6,rep,name=patterns,proto3" json:"patterns,omitempty"`
+	FixedAddress		 string `protobuf:"bytes,7,rep,name=fixedaddress,proto3" json:"fixedaddress,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -109,6 +110,12 @@ func (m *SetDNSChaosRequest) GetPatterns() []string {
 		return m.Patterns
 	}
 	return nil
+}
+func (m *SetDNSChaosRequest) GetFixedAddress() string {
+	if m != nil {
+		return m.FixedAddress
+	}
+	return ""
 }
 
 type Pod struct {

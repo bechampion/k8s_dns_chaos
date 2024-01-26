@@ -52,6 +52,8 @@ func (k Kubernetes) SetDNSChaos(ctx context.Context, req *pb.SetDNSChaosRequest)
 		scope = ScopeAll
 	}
 
+	// Feed fixed Address to podInfo
+	fmt.Printf("Feed fixed address %s", fixedAddress)
 	// build selector
 	selector := trieselector.NewTrieSelector()
 	for _, pattern := range req.Patterns {
@@ -96,6 +98,7 @@ func (k Kubernetes) SetDNSChaos(ctx context.Context, req *pb.SetDNSChaosRequest)
 			Selector:       selector,
 			IP:             v1Pod.Status.PodIP,
 			LastUpdateTime: time.Now(),
+			FixedAddress:   req.FixedAddress,
 		}
 
 		k.podMap[pod.Namespace][pod.Name] = podInfo

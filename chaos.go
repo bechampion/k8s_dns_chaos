@@ -26,6 +26,8 @@ const (
 	ActionError = "error"
 	// ActionRandom means return random IP for DNS request
 	ActionRandom = "random"
+	// ActionFixedAddress means return a fixed IP for DNS request
+	ActionFixedAddress = "fixed"
 )
 
 // PodInfo saves some information for pod
@@ -37,6 +39,7 @@ type PodInfo struct {
 	Selector       selector.Selector
 	IP             string
 	LastUpdateTime time.Time
+	FixedAddress   string
 }
 
 // IsOverdue ...
@@ -57,8 +60,24 @@ func (k Kubernetes) chaosDNS(ctx context.Context, w dns.ResponseWriter, r *dns.M
 
 	// return random IP
 
+	fmt.Printf("return random %s",podInfo.FixedAddress)
 	answers := []dns.RR{}
 	qname := state.Name()
+	if podInfo.Action == ActionFixedAddress{
+		fixedAddress := podInfo.FixedAddress
+		ips := net.ParseIP(fixedAddress)
+		ipv4 := ips.To4()
+		ipv4s := []net.IP{ipv4}
+
+		answers = a(qname, 10,ipv4s )
+		m := new(dns.Msg)
+		m.SetReply(r)
+		m.Authoritative = true
+		m.Answer = answers
+		w.WriteMsg(m)
+		return dns.RcodeSuccess, nil
+
+	}
 
 	// TODO: support more type
 	switch state.QType() {
