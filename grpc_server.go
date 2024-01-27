@@ -53,7 +53,6 @@ func (k Kubernetes) SetDNSChaos(ctx context.Context, req *pb.SetDNSChaosRequest)
 	}
 
 	// Feed fixed Address to podInfo
-	fmt.Printf("Feed fixed address %s", fixedAddress)
 	// build selector
 	selector := trieselector.NewTrieSelector()
 	for _, pattern := range req.Patterns {

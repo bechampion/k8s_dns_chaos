@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pb;
 
+option go_package = "./";
+
 service DNS {
   rpc SetDNSChaos(SetDNSChaosRequest) returns (DNSChaosResponse) {}
   rpc CancelDNSChaos(CancelDNSChaosRequest) returns (DNSChaosResponse) {}
@@ -23,7 +25,7 @@ message SetDNSChaosRequest {
   string scope = 4;
   string selector = 5;
   repeated string patterns = 6;
-  string fixedaddress = 7
+//  string fixedaddress = 7;
 }
 
 message Pod {

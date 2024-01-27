@@ -60,7 +60,6 @@ func (k Kubernetes) chaosDNS(ctx context.Context, w dns.ResponseWriter, r *dns.M
 
 	// return random IP
 
-	fmt.Printf("return random %s",podInfo.FixedAddress)
 	answers := []dns.RR{}
 	qname := state.Name()
 	if podInfo.Action == ActionFixedAddress{

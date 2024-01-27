@@ -14,7 +14,7 @@ RUN cd coredns && \
     go get github.com/chaos-mesh/k8s_dns_chaos && \
     go generate && \
     go mod tidy
-RUN cd coredns && make
+RUN cd coredns && make 
 
 FROM debian:stable-slim AS certs
 RUN apt-get update && apt-get -uy upgrade
