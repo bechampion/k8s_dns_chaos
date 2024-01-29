@@ -39,7 +39,7 @@ type PodInfo struct {
 	Selector       selector.Selector
 	IP             string
 	LastUpdateTime time.Time
-	FixedAddress   string
+	FixedAddress   []string
 }
 
 // IsOverdue ...
@@ -59,16 +59,16 @@ func (k Kubernetes) chaosDNS(ctx context.Context, w dns.ResponseWriter, r *dns.M
 	}
 
 	// return random IP
-
 	answers := []dns.RR{}
 	qname := state.Name()
+	iplist := []net.IP{}
 	if podInfo.Action == ActionFixedAddress{
-		fixedAddress := podInfo.FixedAddress
-		ips := net.ParseIP(fixedAddress)
-		ipv4 := ips.To4()
-		ipv4s := []net.IP{ipv4}
+			for address := range podInfo.FixedAddress{
+			ips := net.ParseIP(podInfo.FixedAddress[address]).To4()
+			iplist=append(iplist,ips)
+		}
 
-		answers = a(qname, 10,ipv4s )
+		answers = a(qname, 10,iplist)
 		m := new(dns.Msg)
 		m.SetReply(r)
 		m.Authoritative = true

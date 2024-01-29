@@ -7,12 +7,12 @@
 package pb
 
 import (
+	context "golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
-	context "golang.org/x/net/context"
 )
 
 const (
@@ -39,7 +39,34 @@ var _DNS_serviceDesc = grpc.ServiceDesc{
 	Metadata: "dns.proto",
 }
 
- type DNSServer interface {                                                                                                                                                            
+
+type DNSClient interface {
+	SetDNSChaos(ctx context.Context, in *SetDNSChaosRequest, opts ...grpc.CallOption) (*DNSChaosResponse, error)
+	CancelDNSChaos(ctx context.Context, in *CancelDNSChaosRequest, opts ...grpc.CallOption) (*DNSChaosResponse, error)
+}
+type dNSClient struct {
+	cc *grpc.ClientConn
+}
+
+func (c *dNSClient) SetDNSChaos(ctx context.Context, in *SetDNSChaosRequest, opts ...grpc.CallOption) (*DNSChaosResponse, error) {
+	out := new(DNSChaosResponse)
+	err := c.cc.Invoke(ctx, "/pb.DNS/SetDNSChaos", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dNSClient) CancelDNSChaos(ctx context.Context, in *CancelDNSChaosRequest, opts ...grpc.CallOption) (*DNSChaosResponse, error) {
+	out := new(DNSChaosResponse)
+	err := c.cc.Invoke(ctx, "/pb.DNS/CancelDNSChaos", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+type DNSServer interface {
 	SetDNSChaos(context.Context, *SetDNSChaosRequest) (*DNSChaosResponse, error)
 	CancelDNSChaos(context.Context, *CancelDNSChaosRequest) (*DNSChaosResponse, error)
 }
@@ -63,43 +90,16 @@ type SetDNSChaosRequest struct {
 	Scope        string   `protobuf:"bytes,4,opt,name=scope,proto3" json:"scope,omitempty"`
 	Selector     string   `protobuf:"bytes,5,opt,name=selector,proto3" json:"selector,omitempty"`
 	Patterns     []string `protobuf:"bytes,6,rep,name=patterns,proto3" json:"patterns,omitempty"`
-	FixedAddress string   `protobuf:"bytes,7,opt,name=fixedaddress,proto3" json:"fixedaddress,omitempty"`
+	Fixedaddress []string `protobuf:"bytes,7,rep,name=fixedaddress,proto3" json:"fixedaddress,omitempty"`
 }
 
-
-type DNSClient interface {
-	SetDNSChaos(ctx context.Context, in *SetDNSChaosRequest, opts ...grpc.CallOption) (*DNSChaosResponse, error)
-	CancelDNSChaos(ctx context.Context, in *CancelDNSChaosRequest, opts ...grpc.CallOption) (*DNSChaosResponse, error)
-}
-
-type dNSClient struct {
-	cc *grpc.ClientConn
-}
-
-func (c *dNSClient) SetDNSChaos(ctx context.Context, in *SetDNSChaosRequest, opts ...grpc.CallOption) (*DNSChaosResponse, error) {
-	out := new(DNSChaosResponse)
-	err := c.cc.Invoke(ctx, "/pb.DNS/SetDNSChaos", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dNSClient) CancelDNSChaos(ctx context.Context, in *CancelDNSChaosRequest, opts ...grpc.CallOption) (*DNSChaosResponse, error) {
-	out := new(DNSChaosResponse)
-	err := c.cc.Invoke(ctx, "/pb.DNS/CancelDNSChaos", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
 func NewDNSClient(cc *grpc.ClientConn) DNSClient {
 	return &dNSClient{cc}
 }
-
 func RegisterDNSServer(s *grpc.Server, srv DNSServer) {
 	s.RegisterService(&_DNS_serviceDesc, srv)
 }
+
 func _DNS_SetDNSChaos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SetDNSChaosRequest)
 	if err := dec(in); err != nil {
@@ -208,11 +208,11 @@ func (x *SetDNSChaosRequest) GetPatterns() []string {
 	return nil
 }
 
-func (x *SetDNSChaosRequest) GetFixedaddress() string {
+func (x *SetDNSChaosRequest) GetFixedaddress() []string {
 	if x != nil {
-		return x.FixedAddress
+		return x.Fixedaddress
 	}
-	return ""
+	return nil
 }
 
 type Pod struct {
@@ -388,7 +388,7 @@ var file_dns_proto_rawDesc = []byte{
 	0x72, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x74, 0x74, 0x65, 0x72, 0x6e, 0x73, 0x18, 0x06, 0x20,
 	0x03, 0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x74, 0x74, 0x65, 0x72, 0x6e, 0x73, 0x12, 0x22, 0x0a,
 	0x0c, 0x66, 0x69, 0x78, 0x65, 0x64, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x18, 0x07, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x0c, 0x66, 0x69, 0x78, 0x65, 0x64, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73,
+	0x03, 0x28, 0x09, 0x52, 0x0c, 0x66, 0x69, 0x78, 0x65, 0x64, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73,
 	0x73, 0x22, 0x37, 0x0a, 0x03, 0x50, 0x6f, 0x64, 0x12, 0x1c, 0x0a, 0x09, 0x6e, 0x61, 0x6d, 0x65,
 	0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x6e, 0x61, 0x6d,
 	0x65, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02,

@@ -97,7 +97,7 @@ func (k Kubernetes) SetDNSChaos(ctx context.Context, req *pb.SetDNSChaosRequest)
 			Selector:       selector,
 			IP:             v1Pod.Status.PodIP,
 			LastUpdateTime: time.Now(),
-			FixedAddress:   req.FixedAddress,
+			FixedAddress:   req.Fixedaddress,
 		}
 
 		k.podMap[pod.Namespace][pod.Name] = podInfo
