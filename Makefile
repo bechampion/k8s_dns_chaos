@@ -1,8 +1,8 @@
 .DEFAULT_GOAL:=help
-
+export IMAGE_TAG ?= latest
 .PHONY: image
 image: ## Build the latest container image
-	DOCKER_BUILDKIT=1 docker build -t ghcr.io/chaos-mesh/chaos-coredns:latest .
+	DOCKER_BUILDKIT=1 docker build -t ghcr.io/chaos-mesh/chaos-coredns:${IMAGE_TAG} .
 
 .PHONY: coredns
 coredns: image ## Build the coredns executable binary
