@@ -2,6 +2,7 @@ module github.com/chaos-mesh/k8s_dns_chaos
 
 go 1.19
 
+replace github.com/chaos-mesh/k8s_dns_chaos/pb => ./pb
 require (
 	github.com/caddyserver/caddy v1.0.5
 	github.com/coredns/caddy v1.1.1

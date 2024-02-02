@@ -11,6 +11,12 @@ import (
 
 // ServeDNS implements the plugin.Handler interface.
 func (k Kubernetes) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (int, error) {
+	var (
+		records   []dns.RR
+		extra     []dns.RR
+		truncated bool
+		err       error
+	)
 	state := request.Request{W: w, Req: r}
 
 	qname := state.QName()
@@ -20,13 +26,18 @@ func (k Kubernetes) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.M
 	}
 	zone = qname[len(qname)-len(zone):] // maintain case of original query
 	state.Zone = zone
+	sourceIP := state.IP()
 
-	var (
-		records   []dns.RR
-		extra     []dns.RR
-		truncated bool
-		err       error
-	)
+	chaosPod, err := k.getChaosPod(sourceIP)
+	if err != nil {
+		log.Infof("fail to get pod information from cluster, IP: %s, error: %v", sourceIP, err)
+	}
+
+
+	if k.needChaos(chaosPod, records, state.QName()) {
+		return k.chaosDNS(ctx, w, r, state, chaosPod)
+	}
+
 
 	switch state.QType() {
 	case dns.TypeA:
