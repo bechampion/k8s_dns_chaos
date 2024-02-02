@@ -1,16 +1,15 @@
 # syntax=docker/dockerfile:experimental
 
-FROM golang:1.19 AS build-env
+FROM golang:1.21 AS build-env
 ENV GO111MODULE on
 WORKDIR /
-RUN git clone https://github.com/coredns/coredns && cd coredns && git checkout 7d5f5b87a4fb310d442f7ef0d52e3fead0e10d39
+RUN git clone https://github.com/coredns/coredns
 COPY . /k8s_dns_chaos
 # RUN ln -s /k8s_dns_chaos /coredns/plugin/k8s_dns_chaos
 RUN sed -i '/kubernetes/a\k8s_dns_chaos:github.com/chaos-mesh/k8s_dns_chaos' /coredns/plugin.cfg
 RUN cd coredns && \
-    go mod edit -require github.com/chaos-mesh/k8s_dns_chaos@v0.0.0-00000000000000-000000000000 && \
+    go mod edit -require github.com/chaos-mesh/k8s_dns_chaos@v0.2.6 && \
     go mod edit -replace github.com/chaos-mesh/k8s_dns_chaos=/k8s_dns_chaos && \ 
-    go mod edit -replace google.golang.org/grpc=google.golang.org/grpc@v1.29.1 && \
     go get github.com/chaos-mesh/k8s_dns_chaos && \
     go generate && \
     go mod tidy

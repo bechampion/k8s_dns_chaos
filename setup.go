@@ -16,12 +16,11 @@ import (
 	"github.com/coredns/coredns/plugin/pkg/parse"
 	"github.com/coredns/coredns/plugin/pkg/upstream"
 
-	"github.com/caddyserver/caddy"
+	"github.com/coredns/caddy"
 	"github.com/miekg/dns"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"       // pull this in here, because we want it excluded if plugin.cfg doesn't have k8s
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"      // pull this in here, because we want it excluded if plugin.cfg doesn't have k8s
-	_ "k8s.io/client-go/plugin/pkg/client/auth/openstack" // pull this in here, because we want it excluded if plugin.cfg doesn't have k8s
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
 )
@@ -244,14 +243,13 @@ func ParseStanza(c *caddy.Controller) (*Kubernetes, error) {
 			}
 			k8s.ttl = uint32(t)
 		case "transfer":
-			tos, froms, err := parse.Transfer(c, false)
+			froms, err := parse.TransferIn(c)
 			if err != nil {
 				return nil, err
 			}
 			if len(froms) != 0 {
 				return nil, c.Errf("transfer from is not supported with this plugin")
 			}
-			k8s.TransferTo = tos
 		case "noendpoints":
 			if len(c.RemainingArgs()) != 0 {
 				return nil, c.ArgErr()

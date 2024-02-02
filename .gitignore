@@ -1,5 +1,5 @@
 # Binaries for programs and plugins
-vendor
+vendor/*
 *.exe
 *.exe~
 *.dll
@@ -12,8 +12,6 @@ vendor
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
 
 # binary artifact
 coredns
