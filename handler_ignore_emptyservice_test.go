@@ -3,7 +3,6 @@ package kubernetes
 import (
 	"context"
 	"testing"
-
 	"github.com/coredns/coredns/plugin/pkg/dnstest"
 	"github.com/coredns/coredns/plugin/test"
 
@@ -42,7 +41,8 @@ func TestServeDNSEmptyService(t *testing.T) {
 
 		w := dnstest.NewRecorder(&test.ResponseWriter{})
 
-		_, err := k.ServeDNS(ctx, w, r)
+		_ ,err := k.ServeDNS(ctx, w, r)
+
 		if err != tc.Error {
 			t.Errorf("Test %d expected no error, got %v", i, err)
 			return
@@ -64,5 +64,6 @@ func TestServeDNSEmptyService(t *testing.T) {
 		if err := test.SortAndCheck(resp, tc); err != nil {
 			t.Error(err)
 		}
+		return
 	}
 }

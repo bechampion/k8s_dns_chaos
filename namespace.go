@@ -9,7 +9,7 @@ func (k *Kubernetes) filteredNamespaceExists(namespace string) bool {
 	if err != nil {
 		return false
 	}
-	return ns.ObjectMeta.Name == namespace
+	return ns.Name == namespace
 }
 
 // configuredNamespace returns true when the namespace is exposed through the plugin

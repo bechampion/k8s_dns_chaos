@@ -12,8 +12,6 @@ import (
 
 // Reverse implements the ServiceBackend interface.
 func (k *Kubernetes) Reverse(ctx context.Context, state request.Request, exact bool, opt plugin.Options) ([]msg.Service, error) {
-	log.Infof("Reverse, sourceIP: %s", state.IP())
-
 	ip := dnsutil.ExtractAddressFromReverse(state.Name())
 	if ip == "" {
 		_, e := k.Records(ctx, state, exact)
@@ -47,7 +45,7 @@ func (k *Kubernetes) serviceRecordForIP(ip, name string) []msg.Service {
 		for _, eps := range ep.Subsets {
 			for _, addr := range eps.Addresses {
 				if addr.IP == ip {
-					domain := strings.Join([]string{endpointHostname(addr, k.endpointNameMode), ep.Name, ep.Namespace, Svc, k.primaryZone()}, ".")
+					domain := strings.Join([]string{endpointHostname(addr, k.endpointNameMode), ep.Index, Svc, k.primaryZone()}, ".")
 					svcs = append(svcs, msg.Service{Host: domain, TTL: k.ttl})
 				}
 			}

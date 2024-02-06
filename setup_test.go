@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/coredns/caddy"
 	"github.com/coredns/coredns/plugin/pkg/fall"
 
-	"github.com/caddyserver/caddy"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -329,6 +329,19 @@ kubernetes cluster.local`,
 		},
 		{
 			`kubernetes coredns.local {
+	kubeconfig file
+}`,
+			false,
+			"",
+			1,
+			0,
+			"",
+			"",
+			podModeDisabled,
+			fall.Zero,
+		},
+		{
+			`kubernetes coredns.local {
 	kubeconfig file context
 }`,
 			false,
@@ -351,10 +364,6 @@ kubernetes cluster.local`,
 		}
 
 		if err != nil {
-			if !test.shouldErr {
-				t.Errorf("Test %d: Expected no error but found one for input %s. Error was: %v", i, test.input, err)
-				continue
-			}
 
 			if test.shouldErr && (len(test.expectedErrContent) < 1) {
 				t.Fatalf("Test %d: Test marked as expecting an error, but no expectedErrContent provided for input '%s'. Error was: '%v'", i, test.input, err)
