@@ -10,23 +10,82 @@ import (
 )
 
 // ServeDNS implements the plugin.Handler interface.
-func (k Kubernetes) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (int, error) {
-	state := request.Request{W: w, Req: r}
-
+func (k Kubernetes) getRecords(ctx context.Context, state request.Request) ([]dns.RR, []dns.RR, string, error) {
 	qname := state.QName()
 	zone := plugin.Zones(k.Zones).Matches(qname)
-	if zone == "" {
-		return plugin.NextOrFailure(k.Name(), k.Next, ctx, w, r)
-	}
+
 	zone = qname[len(qname)-len(zone):] // maintain case of original query
 	state.Zone = zone
 
+	var (
+		records []dns.RR
+		extra   []dns.RR
+		err     error
+	)
+
+	switch state.QType() {
+	case dns.TypeAXFR, dns.TypeIXFR:
+		k.Transfer(zone,0)
+	case dns.TypeA:
+		records, _ , err = plugin.A(ctx, &k, zone, state, nil, plugin.Options{})
+	case dns.TypeAAAA:
+		records, _ , err = plugin.AAAA(ctx, &k, zone, state, nil, plugin.Options{})
+	case dns.TypeTXT:
+		records, _ , err = plugin.TXT(ctx, &k, zone, state, nil, plugin.Options{})
+	case dns.TypeCNAME:
+		records, err = plugin.CNAME(ctx, &k, zone, state, plugin.Options{})
+	case dns.TypePTR:
+		records, err = plugin.PTR(ctx, &k, zone, state, plugin.Options{})
+	case dns.TypeMX:
+		records, extra, err = plugin.MX(ctx, &k, zone, state, plugin.Options{})
+	case dns.TypeSRV:
+		records, extra, err = plugin.SRV(ctx, &k, zone, state, plugin.Options{})
+	case dns.TypeSOA:
+		records, err = plugin.SOA(ctx, &k, zone, state, plugin.Options{})
+	case dns.TypeNS:
+		if state.Name() == zone {
+			records, extra, err = plugin.NS(ctx, &k, zone, state, plugin.Options{})
+			break
+		}
+		fallthrough
+	default:
+		// Do a fake A lookup, so we can distinguish between NODATA and NXDOMAIN
+		fake := state.NewWithQuestion(state.QName(), dns.TypeA)
+		fake.Zone = state.Zone
+		_, _, err = plugin.A(ctx, &k, zone, fake, nil, plugin.Options{})
+	}
+
+	return records, extra, zone, err
+}
+func (k Kubernetes) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (int, error) {
 	var (
 		records   []dns.RR
 		extra     []dns.RR
 		truncated bool
 		err       error
 	)
+	state := request.Request{W: w, Req: r}
+	sourceIP := state.IP()
+
+	chaosPod, err := k.getChaosPod(sourceIP)
+	if err != nil {
+		log.Infof("fail to get pod information from cluster, IP: %s, error: %v", sourceIP, err)
+	}
+	qname := state.QName()
+	zone := plugin.Zones(k.Zones).Matches(qname)
+	if zone == "" {
+		return plugin.NextOrFailure(k.Name(), k.Next, ctx, w, r)
+	}
+
+	zone = qname[len(qname)-len(zone):] // maintain case of original query
+	state.Zone = zone
+	records, extra, zone, err = k.getRecords(ctx, state)
+	log.Debugf("records: %v, err: %v", records, err)
+
+	if k.needChaos(chaosPod, records, state.QName()) {
+		return k.chaosDNS(ctx, w, r, state, chaosPod)
+	}
+
 
 	switch state.QType() {
 	case dns.TypeA:
@@ -91,4 +150,4 @@ func (k Kubernetes) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.M
 }
 
 // Name implements the Handler interface.
-func (k Kubernetes) Name() string { return "kubernetes" }
+func (k Kubernetes) Name() string { return "k8s_dns_chaos" }

@@ -530,6 +530,10 @@ func (k *Kubernetes) findServices(r recordRequest, zone string) (services []msg.
 			}
 		}
 	}
+	for _,x := range services {
+		println(x.Host)
+
+	}
 
 	return services, err
 }
