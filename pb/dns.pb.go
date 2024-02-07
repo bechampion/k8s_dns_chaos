@@ -7,12 +7,12 @@
 package pb
 
 import (
-	context "golang.org/x/net/context"
-	grpc "google.golang.org/grpc"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	grpc "google.golang.org/grpc"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
+	context "golang.org/x/net/context"
 )
 
 const (
@@ -38,38 +38,6 @@ var _DNS_serviceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "dns.proto",
 }
-
-
-type DNSClient interface {
-	SetDNSChaos(ctx context.Context, in *SetDNSChaosRequest, opts ...grpc.CallOption) (*DNSChaosResponse, error)
-	CancelDNSChaos(ctx context.Context, in *CancelDNSChaosRequest, opts ...grpc.CallOption) (*DNSChaosResponse, error)
-}
-type dNSClient struct {
-	cc *grpc.ClientConn
-}
-
-func (c *dNSClient) SetDNSChaos(ctx context.Context, in *SetDNSChaosRequest, opts ...grpc.CallOption) (*DNSChaosResponse, error) {
-	out := new(DNSChaosResponse)
-	err := c.cc.Invoke(ctx, "/pb.DNS/SetDNSChaos", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dNSClient) CancelDNSChaos(ctx context.Context, in *CancelDNSChaosRequest, opts ...grpc.CallOption) (*DNSChaosResponse, error) {
-	out := new(DNSChaosResponse)
-	err := c.cc.Invoke(ctx, "/pb.DNS/CancelDNSChaos", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-type DNSServer interface {
-	SetDNSChaos(context.Context, *SetDNSChaosRequest) (*DNSChaosResponse, error)
-	CancelDNSChaos(context.Context, *CancelDNSChaosRequest) (*DNSChaosResponse, error)
-}
 type SetDNSChaosRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -93,11 +61,47 @@ type SetDNSChaosRequest struct {
 	Fixedaddress []string `protobuf:"bytes,7,rep,name=fixedaddress,proto3" json:"fixedaddress,omitempty"`
 }
 
-func NewDNSClient(cc *grpc.ClientConn) DNSClient {
-	return &dNSClient{cc}
+func (x *SetDNSChaosRequest) Reset() {
+	*x = SetDNSChaosRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_dns_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
 }
-func RegisterDNSServer(s *grpc.Server, srv DNSServer) {
-	s.RegisterService(&_DNS_serviceDesc, srv)
+
+func (x *SetDNSChaosRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetDNSChaosRequest) ProtoMessage() {}
+
+func (x *SetDNSChaosRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_dns_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type DNSServer interface {
+	SetDNSChaos(context.Context, *SetDNSChaosRequest) (*DNSChaosResponse, error)
+	CancelDNSChaos(context.Context, *CancelDNSChaosRequest) (*DNSChaosResponse, error)
+}
+// Deprecated: Use SetDNSChaosRequest.ProtoReflect.Descriptor instead.
+func (*SetDNSChaosRequest) Descriptor() ([]byte, []int) {
+	return file_dns_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *SetDNSChaosRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
 }
 
 func _DNS_SetDNSChaos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -134,44 +138,6 @@ func _DNS_CancelDNSChaos_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	return interceptor(ctx, in, info, handler)
 }
-func (x *SetDNSChaosRequest) Reset() {
-	*x = SetDNSChaosRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_dns_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SetDNSChaosRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SetDNSChaosRequest) ProtoMessage() {}
-
-func (x *SetDNSChaosRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_dns_proto_msgTypes[0]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SetDNSChaosRequest.ProtoReflect.Descriptor instead.
-func (*SetDNSChaosRequest) Descriptor() ([]byte, []int) {
-	return file_dns_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *SetDNSChaosRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
 
 func (x *SetDNSChaosRequest) GetPods() []*Pod {
 	if x != nil {
@@ -187,6 +153,9 @@ func (x *SetDNSChaosRequest) GetAction() string {
 	return ""
 }
 
+func RegisterDNSServer(s *grpc.Server, srv DNSServer) {
+	s.RegisterService(&_DNS_serviceDesc, srv)
+}
 func (x *SetDNSChaosRequest) GetScope() string {
 	if x != nil {
 		return x.Scope

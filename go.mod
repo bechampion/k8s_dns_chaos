@@ -82,3 +82,9 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
+
+replace github.com/coredns/coredns@v1.11.1/pb => ./pb
+
+replace github.com/coredns/coredns/pb => ./pb
+
+replace github.com/chaos-mesh/k8s_dns_chaos/pb => ./pb
